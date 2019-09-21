@@ -6,17 +6,18 @@
 import logging, math
 import stepper, homing
 
-class CoreXYKinematics:
+class Core2XYKinematics:
     def __init__(self, toolhead, config):
         # Setup axis rails
-        self.rails = [ stepper.PrinterRail(config.getsection('stepper_x')),
-                       stepper.PrinterRail(config.getsection('stepper_x1')),
+        self.rails = [ stepper.LookupMultiRail(config.getsection('stepper_x')),
                        stepper.PrinterRail(config.getsection('stepper_y')),
                        stepper.LookupMultiRail(config.getsection('stepper_z')) ]
-        self.rails[0].add_to_endstop(self.rails[1].get_endstops()[0][0])
+        steppers_x = self.rails[0].get_steppers()
+        steppers_x[0].add_to_endstop(self.rails[1].get_endstops()[0][0])
         self.rails[1].add_to_endstop(self.rails[0].get_endstops()[0][0])
-        self.rails[0].setup_itersolve('corexy_stepper_alloc', '+')
-        self.rails[1].setup_itersolve('corexy_stepper_alloc', '-')
+        steppers_x[0].setup_itersolve('core2xy_stepper_alloc', '+')
+        steppers_x[1].setup_itersolve('core2xy_stepper_alloc', 'y')
+        self.rails[1].setup_itersolve('core2xy_stepper_alloc', '-')
         self.rails[2].setup_itersolve('cartesian_stepper_alloc', 'z')
         # Setup boundary checks
         max_velocity, max_accel = toolhead.get_max_velocity()
@@ -68,19 +69,18 @@ class CoreXYKinematics:
             rail.motor_enable(print_time, 0)
         self.need_motor_enable = True
     def _check_motor_enable(self, print_time, move):
-        if move.axes_d[0] or move.axes_d[1] or move.axes_d[2]:
+        if move.axes_d[0] or move.axes_d[1]:
             self.rails[0].motor_enable(print_time, 1)
             self.rails[1].motor_enable(print_time, 1)
+        if move.axes_d[2]:
             self.rails[2].motor_enable(print_time, 1)
-        if move.axes_d[3]:
-            self.rails[3].motor_enable(print_time, 1)
         need_motor_enable = False
         for rail in self.rails:
             need_motor_enable |= not rail.is_motor_enabled()
         self.need_motor_enable = need_motor_enable
     def _check_endstops(self, move):
         end_pos = move.end_pos
-        for i in (0, 1, 2, 3):
+        for i in (0, 1, 2):
             if (move.axes_d[i]
                 and (end_pos[i] < self.limits[i][0]
                      or end_pos[i] > self.limits[i][1])):
@@ -90,12 +90,11 @@ class CoreXYKinematics:
                 raise homing.EndstopMoveError(end_pos)
     def check_move(self, move):
         limits = self.limits
-        xpos, x1pos, ypos = move.end_pos[:2]
+        xpos, ypos = move.end_pos[:2]
         if (xpos < limits[0][0] or xpos > limits[0][1]
-            or x1pos < limits[0][0] or x1pos > limits[0][1]
             or ypos < limits[1][0] or ypos > limits[1][1]):
             self._check_endstops(move)
-        if not move.axes_d[3]:
+        if not move.axes_d[2]:
             # Normal XY move - use defaults
             return
         # Move with Z - update velocity and accel for slower Z axis
@@ -108,10 +107,9 @@ class CoreXYKinematics:
             self._check_motor_enable(print_time, move)
         axes_d = move.axes_d
         cmove = move.cmove
-        rail_x, rail_x1, rail_y, rail_z = self.rails
+        rail_x, rail_y, rail_z = self.rails
         if axes_d[0] or axes_d[1]:
             rail_x.step_itersolve(cmove)
-            rail_x1.step_itersolve(cmove)
             rail_y.step_itersolve(cmove)
         if axes_d[2]:
             rail_z.step_itersolve(cmove)
@@ -121,4 +119,4 @@ class CoreXYKinematics:
         }
 
 def load_kinematics(toolhead, config):
-    return CoreXYKinematics(toolhead, config)
+    return Core2XYKinematics(toolhead, config)

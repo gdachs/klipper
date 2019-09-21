@@ -183,8 +183,8 @@ provides further information on the mechanics of moves.
   stepper. The feedback produced from each guess is used to improve
   future guesses so that the process rapidly converges to the desired
   time. The kinematic stepper position formulas are located in the
-  klippy/chelper/ directory (eg, kin_cart.c, kin_corexy.c,
-  kin_delta.c, kin_extruder.c).
+  klippy/chelper/ directory (eg, kin_cart.c, kin_corexy.c, 
+  kin_core2xy.c, kin_delta.c, kin_extruder.c).
 
 * After the iterative solver calculates the step times they are added
   to an array: `itersolve_gen_steps() -> queue_append()` (in
@@ -324,11 +324,11 @@ Useful steps:
    should be able to copy one of these files as a starting point.
 3. Implement the C stepper kinematic position functions for each
    stepper if they are not already available (see kin_cart.c,
-   kin_corexy.c, and kin_delta.c in klippy/chelper/). The function
-   should call `move_get_coord()` to convert a given move time (in
-   seconds) to a cartesian coordinate (in millimeters), and then
-   calculate the desired stepper position (in millimeters) from that
-   cartesian coordinate.
+   kin_corexy.c, kin_core2xy, and kin_delta.c in klippy/chelper/).
+   The function should call `move_get_coord()` to convert a given
+   move time (in seconds) to a cartesian coordinate (in millimeters),
+   and then calculate the desired stepper position (in millimeters)
+   from that cartesian coordinate.
 4. Implement the `calc_position()` method in the new kinematics class.
    This method calculates the position of the toolhead in cartesian
    coordinates from the current position of each stepper. It does not
