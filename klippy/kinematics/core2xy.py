@@ -16,8 +16,8 @@ class Core2XYKinematics:
                        stepper.LookupMultiRail(config.getsection('stepper_z')) ]
         self.rails[0].add_to_endstop(self.rails[1].get_endstops()[0][0])
         self.rails[1].add_to_endstop(self.rails[0].get_endstops()[0][0])
-        self.rails[0].setup_itersolve('corexy_stepper_alloc', '+')
-        self.rails[1].setup_itersolve('corexy_stepper_alloc', '-')
+        self.rails[0].setup_itersolve('core2xy_stepper_alloc', '+')
+        self.rails[1].setup_itersolve('core2xy_stepper_alloc', '-')
         self.rails[2].setup_itersolve('cartesian_stepper_alloc', 'z')
         # Setup boundary checks
         max_velocity, max_accel = toolhead.get_max_velocity()
@@ -46,7 +46,7 @@ class Core2XYKinematics:
                     "Core2XY kinematic supports only a dual_carriage on the X axis")
             self.dual_carriage_axis = 0
             dc_rail = stepper.LookupMultiRail(dc_config)
-            dc_rail.setup_itersolve('corexy_stepper_alloc', 'd')
+            dc_rail.setup_itersolve('core2xy_stepper_alloc', 'd')
             dc_rail.set_max_jerk(max_halt_velocity, max_accel)
             self.dual_carriage_rails = [self.rails[0], dc_rail]
             self.printer.lookup_object('gcode').register_command(
@@ -161,8 +161,8 @@ class Core2XYKinematics:
         toolhead.set_position(self.calc_position() + [extruder_pos])
         if self.limits[dc_axis][0] <= self.limits[dc_axis][1]:
             self.limits[dc_axis] = dc_rail.get_range()
-        self.dual_carriage_rails[carriage].setup_itersolve('corexy_stepper_alloc', '+')
-        self.dual_carriage_rails[1 - carriage].setup_itersolve('corexy_stepper_alloc', 'd')
+        self.dual_carriage_rails[carriage].setup_itersolve('core2xy_stepper_alloc', '+')
+        self.dual_carriage_rails[1 - carriage].setup_itersolve('core2xy_stepper_alloc', 'd')
         self.need_motor_enable = True
     cmd_SET_DUAL_CARRIAGE_help = "Set which carriage is active"
     def cmd_SET_DUAL_CARRIAGE(self, params):
