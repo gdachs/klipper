@@ -27,7 +27,7 @@ core2xy_stepper_minus_calc_position(struct stepper_kinematics *sk, struct move *
 }
 
 static double
-core2xy_stepper_plus_y_only_calc_position(struct stepper_kinematics *sk, struct move *m
+core2xy_stepper_plus_dual_carriage_calc_position(struct stepper_kinematics *sk, struct move *m
                                   , double move_time)
 {
     struct coord c = move_get_coord(m, move_time);
@@ -43,7 +43,7 @@ core2xy_stepper_alloc(char type)
         sk->calc_position = core2xy_stepper_plus_calc_position;
     else if (type == '-')
         sk->calc_position = core2xy_stepper_minus_calc_position;
-    else if (type == 'y')
-        sk->calc_position = core2xy_stepper_plus_y_only_calc_position;
+    else if (type == 'd')
+        sk->calc_position = core2xy_stepper_plus_dual_carriage_calc_position;
     return sk;
 }
