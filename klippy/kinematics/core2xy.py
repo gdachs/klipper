@@ -99,10 +99,9 @@ class Core2XYKinematics:
         self.dual_carriage_rails[1].motor_enable(print_time, 0)
         self.need_motor_enable = True
     def _check_motor_enable(self, print_time, move):
-        if move.axes_d[0]:
-            self.rails[0].motor_enable(print_time, 1)
+        if move.axes_d[0] or move.axes_d[1]:
+            self.dual_carriage_rails[0].motor_enable(print_time, 1)
             self.dual_carriage_rails[1].motor_enable(print_time, 1)
-        if move.axes_d[1]:
             self.rails[1].motor_enable(print_time, 1)
         if move.axes_d[2]:
             self.rails[2].motor_enable(print_time, 1)
