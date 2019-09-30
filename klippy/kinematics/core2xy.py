@@ -139,10 +139,9 @@ class Core2XYKinematics:
         axes_d = move.axes_d
         cmove = move.cmove
         rail_y, rail_z = self.rails[1:]
-        dc1, dc2 = self.dual_carriage_rails
         if axes_d[0] or axes_d[1]:
-            dc1.step_itersolve(cmove)
-            dc2.step_itersolve(cmove)
+            self.dual_carriage_rails[0].step_itersolve(cmove)
+            self.dual_carriage_rails[1].step_itersolve(cmove)
             rail_y.step_itersolve(cmove)
         if axes_d[2]:
             rail_z.step_itersolve(cmove)
