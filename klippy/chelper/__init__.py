@@ -67,7 +67,7 @@ defs_kin_corexy = """
 """
 
 defs_kin_core2xy = """
-    struct stepper_kinematics *core2xy_stepper_alloc(char type);
+    struct stepper_kinematics *core2xy_stepper_alloc(char type, double offset);
 """
 
 defs_kin_delta = """

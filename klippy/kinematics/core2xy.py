@@ -16,8 +16,8 @@ class Core2XYKinematics:
                        stepper.LookupMultiRail(config.getsection('stepper_z')) ]
         self.rails[0].add_to_endstop(self.rails[1].get_endstops()[0][0])
         self.rails[1].add_to_endstop(self.rails[0].get_endstops()[0][0])
-        self.rails[0].setup_itersolve('core2xy_stepper_alloc', '+')
-        self.rails[1].setup_itersolve('core2xy_stepper_alloc', '-')
+        self.rails[0].setup_itersolve('core2xy_stepper_alloc', '+', 0.)
+        self.rails[1].setup_itersolve('core2xy_stepper_alloc', '-', 0.)
         self.rails[2].setup_itersolve('cartesian_stepper_alloc', 'z')
         # Setup boundary checks
         max_velocity, max_accel = toolhead.get_max_velocity()
@@ -46,12 +46,15 @@ class Core2XYKinematics:
                     "Core2XY kinematic supports only a dual_carriage on the X axis")
             self.dual_carriage_axis = 0
             dc_rail = stepper.LookupMultiRail(dc_config)
-            dc_rail.setup_itersolve('core2xy_stepper_alloc', 'd')
+            dc_rail.setup_itersolve('core2xy_stepper_alloc', 'P', 0.)
             dc_rail.set_max_jerk(max_halt_velocity, max_accel)
             self.dual_carriage_rails = [self.rails[0], dc_rail]
             self.printer.lookup_object('gcode').register_command(
                 'SET_DUAL_CARRIAGE', self.cmd_SET_DUAL_CARRIAGE,
                 desc=self.cmd_SET_DUAL_CARRIAGE_help)
+            self.printer.lookup_object('gcode').register_command(
+                'SET_DUAL_CARRIAGE_MODE', self.cmd_SET_DUAL_CARRIAGE_MODE,
+                desc=self.cmd_SET_DUAL_CARRIAGE_MODE_help)
         else:
             raise config.error(
                 "Core2XY kinematic needs a dual_carriage section for the X axis")
@@ -78,7 +81,7 @@ class Core2XYKinematics:
             forcepos[axis] -= 1.5 * (hi.position_endstop - position_min)
         else:
             forcepos[axis] += 1.5 * (position_max - hi.position_endstop)
-        homing_state.home_rails([rail], forcepos, homepos)
+        homing_state.home_rails([rail], forcepos, homepos)^
     def home(self, homing_state):
         # Each axis is homed independently and in order
         for axis in homing_state.get_axes():
@@ -160,14 +163,22 @@ class Core2XYKinematics:
         toolhead.set_position(self.calc_position() + [extruder_pos])
         if self.limits[dc_axis][0] <= self.limits[dc_axis][1]:
             self.limits[dc_axis] = dc_rail.get_range()
-        self.dual_carriage_rails[carriage].setup_itersolve('core2xy_stepper_alloc', '+')
-        self.dual_carriage_rails[1 - carriage].setup_itersolve('core2xy_stepper_alloc', 'd')
+        self.dual_carriage_rails[carriage].setup_itersolve('core2xy_stepper_alloc', '+', 0.)
+        self.dual_carriage_rails[1 - carriage].setup_itersolve('core2xy_stepper_alloc', 'P', 0.)
         self.need_motor_enable = True
     cmd_SET_DUAL_CARRIAGE_help = "Set which carriage is active"
     def cmd_SET_DUAL_CARRIAGE(self, params):
         gcode = self.printer.lookup_object('gcode')
         carriage = gcode.get_int('CARRIAGE', params, minval=0, maxval=1)
         self._activate_carriage(carriage)
+        gcode.reset_last_position()
+    cmd_SET_DUAL_CARRIAGE_MODE_help = "Set dual carriage mode, either park (0), or copy (1), or mirror (2). Needs the offset between the carriages!"
+    def cmd_SET_DUAL_CARRIAGE_MODE(self, params):
+        gcode = self.printer.lookup_object('gcode')
+        mode = gcode.get_int('MODE', params, minval=0, maxval=2)
+        offset = gcode.get_float('OFFSET', params, minval=50, maxval=200)
+        self._activate_carriage(0)
+        self.dual_carriage_rails[1].setup_itersolve('core2xy_stepper_alloc', ['P', 'C', 'M'][mode], offset)
         gcode.reset_last_position()
 
 def load_kinematics(toolhead, config):
