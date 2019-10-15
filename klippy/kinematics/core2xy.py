@@ -81,7 +81,7 @@ class Core2XYKinematics:
             forcepos[axis] -= 1.5 * (hi.position_endstop - position_min)
         else:
             forcepos[axis] += 1.5 * (position_max - hi.position_endstop)
-        homing_state.home_rails([rail], forcepos, homepos)^
+        homing_state.home_rails([rail], forcepos, homepos)
     def home(self, homing_state):
         # Each axis is homed independently and in order
         for axis in homing_state.get_axes():
