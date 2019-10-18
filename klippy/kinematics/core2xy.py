@@ -41,6 +41,7 @@ class Core2XYKinematics:
         if config.has_section('dual_carriage'):
             dc_config = config.getsection('dual_carriage')
             dc_axis = dc_config.getchoice('axis', {'x': 'x', 'y': 'y'})
+            self.dual_carriage_min_distance = dc_config.get_float('min_distance')
             if dc_axis != 'x':
                 raise config.error(
                     "Core2XY kinematic supports only a dual_carriage on the X axis")
@@ -178,7 +179,7 @@ class Core2XYKinematics:
         mode = gcode.getchoice('MODE', {'P': 'P', 'C': 'C', 'M': 'M'})
         distance = 0.
         if mode in ['C', 'M']:
-            distance = gcode.get_float('DISTANCE', params, minval=50, maxval=200)
+            distance = gcode.get_float('DISTANCE', params, minval=self.dual_carriage_min_distance, maxval=200)
         self._activate_carriage(0)
         self.dual_carriage_rails[1].setup_itersolve('core2xy_stepper_alloc', mode, distance)
         gcode.reset_last_position()
