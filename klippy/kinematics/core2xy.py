@@ -172,13 +172,15 @@ class Core2XYKinematics:
         carriage = gcode.get_int('CARRIAGE', params, minval=0, maxval=1)
         self._activate_carriage(carriage)
         gcode.reset_last_position()
-    cmd_SET_DUAL_CARRIAGE_MODE_help = "Set dual carriage mode, either park (0), or copy (1), or mirror (2). Needs the offset between the carriages!"
+    cmd_SET_DUAL_CARRIAGE_MODE_help = "Set dual carriage mode, either park (P), or copy (C), or mirror (M). Copy and mirror mode need the distance between the carriages!"
     def cmd_SET_DUAL_CARRIAGE_MODE(self, params):
         gcode = self.printer.lookup_object('gcode')
-        mode = gcode.get_int('MODE', params, minval=0, maxval=2)
-        offset = gcode.get_float('OFFSET', params, minval=50, maxval=200)
+        mode = gcode.getchoice('MODE', {'P': 'P', 'C': 'C', 'M': 'M'})
+        distance = 0.
+        if mode in ['C', 'M']:
+            distance = gcode.get_float('DISTANCE', params, minval=50, maxval=200)
         self._activate_carriage(0)
-        self.dual_carriage_rails[1].setup_itersolve('core2xy_stepper_alloc', ['P', 'C', 'M'][mode], offset)
+        self.dual_carriage_rails[1].setup_itersolve('core2xy_stepper_alloc', mode, distance)
         gcode.reset_last_position()
 
 def load_kinematics(toolhead, config):
