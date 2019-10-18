@@ -70,7 +70,7 @@ class Core2XYKinematics:
             rail.set_position(newpos)
             if i in homing_axes:
                 self.limits[i] = rail.get_range()
-    def _home_rail(self, homing_state, axis, rail):
+    def _home_axis(self, homing_state, axis, rail):
         # Determine movement an home rail
         position_min, position_max = rail.get_range()
         hi = rail.get_homing_info()
@@ -89,12 +89,12 @@ class Core2XYKinematics:
                 dc1, dc2 = self.dual_carriage_rails
                 altc = self.rails[axis] == dc2
                 self._activate_carriage(0)
-                self._home_rail(homing_state, axis, dc1)
+                self._home_axis(homing_state, axis, dc1)
                 self._activate_carriage(1)
-                self._home_rail(homing_state, axis, dc2)
+                self._home_axis(homing_state, axis, dc2)
                 self._activate_carriage(altc)
             else:
-                self._home_rail(homing_state, axis, self.rails[axis])
+                self._home_axis(homing_state, axis, self.rails[axis])
     def motor_off(self, print_time):
         self.limits = [(1.0, -1.0)] * 3
         for rail in self.rails:
