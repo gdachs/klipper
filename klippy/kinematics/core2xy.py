@@ -41,7 +41,7 @@ class Core2XYKinematics:
         if config.has_section('dual_carriage'):
             dc_config = config.getsection('dual_carriage')
             dc_axis = dc_config.getchoice('axis', {'x': 'x', 'y': 'y'})
-            self.dual_carriage_min_distance = dc_config.get_float('min_distance')
+            self.dual_carriage_min_distance = dc_config.getfloat('min_distance')
             if dc_axis != 'x':
                 raise config.error(
                     "Core2XY kinematic supports only a dual_carriage on the X axis")
