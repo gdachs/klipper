@@ -15,15 +15,9 @@ COMPILE_CMD = ("gcc -Wall -g -O2 -shared -fPIC"
                " -flto -fwhole-program -fno-use-linker-plugin"
                " -o %s %s")
 SOURCE_FILES = [
-<<<<<<< HEAD
-    'pyhelper.c', 'serialqueue.c', 'stepcompress.c', 'itersolve.c',
+    'pyhelper.c', 'serialqueue.c', 'stepcompress.c', 'itersolve.c', 'trapq.c',
     'kin_cartesian.c', 'kin_corexy.c', 'kin_core2xy.c', 'kin_delta.c',
     'kin_polar.c', 'kin_winch.c', 'kin_extruder.c',
-=======
-    'pyhelper.c', 'serialqueue.c', 'stepcompress.c', 'itersolve.c', 'trapq.c',
-    'kin_cartesian.c', 'kin_corexy.c', 'kin_delta.c', 'kin_polar.c',
-    'kin_winch.c', 'kin_extruder.c',
->>>>>>> upstream
 ]
 DEST_LIB = "c_helper.so"
 OTHER_FILES = [
@@ -147,13 +141,8 @@ defs_std = """
 
 defs_all = [
     defs_pyhelper, defs_serialqueue, defs_std,
-<<<<<<< HEAD
-    defs_stepcompress, defs_itersolve,
-    defs_kin_cartesian, defs_kin_corexy, defs_kin_core2xy, defs_kin_delta, defs_kin_polar,
-=======
     defs_stepcompress, defs_itersolve, defs_trapq,
-    defs_kin_cartesian, defs_kin_corexy, defs_kin_delta, defs_kin_polar,
->>>>>>> upstream
+    defs_kin_cartesian, defs_kin_corexy, defs_kin_core2xy, defs_kin_delta, defs_kin_polar,
     defs_kin_winch, defs_kin_extruder
 ]
 
