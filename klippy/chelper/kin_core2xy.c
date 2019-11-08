@@ -10,6 +10,7 @@
 #include <string.h> // memset
 #include "compiler.h" // __visible
 #include "itersolve.h" // struct stepper_kinematics
+#include "trapq.h" // move_get_coord
 
 struct dual_carriage {
     struct stepper_kinematics sk;
@@ -65,14 +66,14 @@ core2xy_stepper_alloc(char type, double offset)
     memset(dc, 0, sizeof(*dc));
     dc->offset = offset;
     if (type == '+')
-        dc->sk.calc_position = core2xy_stepper_plus_calc_position;
+        dc->sk.calc_position_cb = core2xy_stepper_plus_calc_position;
     else if (type == '-')
-        dc->sk.calc_position = core2xy_stepper_minus_calc_position;
+        dc->sk.calc_position_cb = core2xy_stepper_minus_calc_position;
     else if (type == 'P')
-        dc->sk.calc_position = core2xy_stepper_dc_park_calc_position;
+        dc->sk.calc_position_cb = core2xy_stepper_dc_park_calc_position;
     else if (type == 'C')
-        dc->sk.calc_position = core2xy_stepper_dc_copy_calc_position;
+        dc->sk.calc_position_cb = core2xy_stepper_dc_copy_calc_position;
     else if (type == 'M')
-        dc->sk.calc_position = core2xy_stepper_dc_mirror_calc_position;
+        dc->sk.calc_position_cb = core2xy_stepper_dc_mirror_calc_position;
     return &dc->sk;
 }
